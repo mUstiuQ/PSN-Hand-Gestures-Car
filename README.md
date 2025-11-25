@@ -129,8 +129,8 @@ int minPWM = 85;
 int maxPWM = 200;         
 
 Direction Fix
-float dirFataSpate = -1.0;
-float dirStangaDreapta = -1.0;
+float dirFataSpate = 1.0;
+float dirStangaDreapta = 1.0;
 
 ---
 
@@ -162,7 +162,7 @@ Left/Right = steer
 ## Troubleshooting
 Robot stutters or resets
 
-Add a 10µF–100µF capacitor to NRF24L01 VCC/GND.
+Add a 470µF capacitor to NRF24L01 VCC/GND.
 
 Motors spin in the wrong direction
 
@@ -170,7 +170,7 @@ Adjust the direction variables instead of rewiring.
 
 Constant buzzer beeping
 
-Obstacle detected < 15 cm.
+Obstacle detected < 12 cm.
 
 Robot doesn’t move at low tilt
 
