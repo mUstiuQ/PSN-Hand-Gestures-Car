@@ -1,95 +1,92 @@
 
 # Wireless Hand-Gesture Controlled Robot
-With Obstacle Avoidance & Progressive Speed Control
+A 4WD wireless rover controlled through a gesture-based wearable glove, featuring progressive speed control, differential steering, ultrasonic obstacle avoidance, and real-time feedback.
 
-A fully wireless 4WD robotic rover controlled through a wearable gesture-based glove.
-The system uses an Arduino Mega on the robot and an Arduino Nano/Uno on the transmitter, communicating through NRF24L01 modules.
+# Features
 
-The robot features progressive PWM acceleration, differential steering, active ultrasonic obstacle avoidance, and real-time audio feedback.
+Proportional Gesture Control using MPU6050
+Smooth acceleration based on hand tilt (PWM 85–255), not simple ON/OFF.
 
- Key Features
- Proportional Gesture Control
+Differential Steering Logic
+Blends throttle + steering for precise turning.
 
-Speed is fully analog — not just ON/OFF.
+Long-Range Wireless Communication
+NRF24L01 modules with reliable packet transmission.
 
-The robot accelerates smoothly (PWM 85–255) based on hand tilt using the MPU6050.
+Intelligent Obstacle Avoidance
 
- Differential Steering
+Emergency braking under 15 cm
 
-Smooth turning using a mix of throttle + steering input for precise directional control.
+Servo-mounted ultrasonic scanner
 
- Long-Range Wireless Link
+“Parking sensor”-style buzzer feedback
 
-NRF24L01 modules ensure stable, low-latency communication with packet integrity checks.
+Fail-Safe Protection
+Motors stop automatically if radio signal is lost or obstacle detected.
 
- Smart Obstacle Avoidance
+---
 
-Automatic emergency braking under 15 cm
+## Components Used
+Transmitter – The Glove
+Component	Quantity	Description
+Arduino Nano / Uno	1	Microcontroller for gesture detection
+MPU6050	1	IMU Gyro & Accelerometer
+NRF24L01 + PA/LNA	1	Long-range wireless module
+10µF Capacitor	1	Must be soldered on NRF24 VCC/GND
+Battery (9V or Power Bank)	1	Power source
+LED (Pin 13)	1	Status / Heartbeat indicator
+Receiver – The Robot
+Component	Quantity	Description
+Arduino Mega 2560	1	Central controller
+L298N Motor Driver	1	H-Bridge for motor control
+TT Gear Motors	4	4WD propulsion
+NRF24L01	1	Wireless receiver
+HC-SR04	1	Ultrasonic distance sensor
+SG90 Servo	1	Rotates ultrasonic sensor for scanning
+Active Buzzer	1	Audio feedback
+2× 18650 Batteries	1 pack	High-current power
 
-Servo-mounted HC-SR04 performs scanning for free direction
+---
 
-“Parking sensor”-style beeping for distance awareness
+## How It Works
 
- Fail-Safe Systems
+The glove detects hand tilt using the MPU6050.
 
-Motors stop instantly if:
+NRF24L01 transmits throttle + steering values to the robot.
 
-Radio signal is lost
+The robot applies progressive PWM acceleration and differential steering.
 
-A close obstacle is detected
+The ultrasonic scanner monitors obstacles:
 
- Hardware Requirements
- Transmitter (Wearable Glove)
+Under 15 cm → robot brakes instantly
 
-Arduino Nano / Uno
+Servo sweeps left/right to find a free direction
 
-MPU6050 IMU (Gyroscope + Accelerometer)
+Buzzer beeps with increasing frequency as distance decreases
 
-NRF24L01 + PA/LNA radio
+If radio link fails, motors shut down automatically.
 
-(Recommended: add 10 µF capacitor between VCC & GND)
+---
 
-Power source: 9V battery or power bank
-
-Status LED (pin 13) for heartbeat/diagnostics
-
- Receiver (Robot Car)
-
-Arduino Mega 2560
-
-L298N Motor Driver
-
-4× DC Gear Motors (TT yellow motors)
-
-NRF24L01 module (with capacitor)
-
-HC-SR04 ultrasonic sensor
-
-SG90 micro-servo for scanning
-
-Active buzzer
-
-Power: 2× 18650 Li-Ion cells (7.4V) or other high-current supply
-
- Wiring & Pinout
-Receiver (Arduino Mega 2560)
-Component	Pin Name	Arduino Pin	Note
+### Hardware Setup (Wiring Overview)
+Receiver – Arduino Mega
+Component	Pin Name	Arduino Pin	Notes
 L298N	IN1 / IN2	D5 / D4	Left motors (PWM)
 L298N	IN3 / IN4	D3 / D2	Right motors (PWM)
 NRF24L01	CE / CSN	D7 / D11	Radio control
 NRF24L01	SCK / MOSI / MISO	52 / 51 / 50	Hardware SPI
-NRF24L01	VCC / GND	3.3V / GND	Never use 5V
-Servo	Signal	A0	Sensor scanning
-HC-SR04	Trig / Echo	A3 / A4	Distance measurement
-Buzzer	VCC	D6	Positive pin
-Transmitter (Arduino Nano / Uno)
+NRF24L01	VCC / GND	3.3V / GND	Add capacitor
+Servo	Signal	A0	Ultrasonic scanning
+HC-SR04	Trig / Echo	A3 / A4	Distance reading
+Buzzer	VCC	D6	Audio alerts
+Transmitter – Arduino Nano/Uno
 Component	Pin Name	Arduino Pin
 NRF24L01	CE / CSN	D7 / D8
 NRF24L01	SCK / MOSI / MISO	D13 / D11 / D12
 MPU6050	SDA / SCL	A4 / A5
 📚 Software Dependencies
 
-Install these via Arduino IDE → Library Manager:
+Install via Arduino IDE Library Manager:
 
 RF24 by TMRh20
 
@@ -101,75 +98,67 @@ SPI (built-in)
 
 Wire (built-in)
 
- Configuration & Tuning
-Transmitter Sensitivity
+---
 
-Inside the transmitter code:
+## Configuration & Calibration
+Gesture Sensitivity
+int deadzoneAccel = 20;   
+int maxAccelAngle = 45;   
+int minPWM = 85;          
+int maxPWM = 255;         
 
-int deadzoneAccel = 20;   // Tilt needed to start moving
-int maxAccelAngle = 45;   // Tilt angle for max speed
-int minPWM = 85;          // Minimum motor power
-int maxPWM = 255;         // Maximum speed
+Direction Fix
+float dirFataSpate = -1.0;
+float dirStangaDreapta = -1.0;
 
-Fixing Direction Inversion
+---
 
-If forward/backward or steering feels reversed:
+## How to Run
 
-float dirFataSpate = -1.0;      // Set to 1.0 if inverted
-float dirStangaDreapta = -1.0;  // Set to 1.0 if inverted
+Assemble the Hardware using the wiring tables.
 
- How to Run
+Install all required libraries.
 
-Assemble all hardware
-Follow the wiring tables above. Ensure common ground between modules.
+Upload code:
 
-Install all required libraries
+Transmitter_Code.ino → Glove
 
-Upload the code
+Receiver_Code.ino → Robot
 
-Upload Transmitter_Code.ino to the glove Arduino
+Calibrate:
+Place glove on a flat surface → press reset → wait ~3 seconds.
 
-Upload Receiver_Code.ino to the Arduino Mega
-(Disconnect the NRF24 modules if uploading causes errors)
+Drive:
 
-Calibrate the glove
+Tilt forward = accelerate
 
-Place on a flat surface
+Backward = reverse
 
-Reset Arduino
+Left/Right = steer
 
-Wait ~3 seconds for MPU6050 calibration
+---
 
-Drive!
-
-Tilt forward → accelerate
-
-Tilt backward → reverse
-
-Tilt left/right → steer
-
- Troubleshooting
+## Troubleshooting
 Robot stutters or resets
 
-NRF24L01 has voltage spikes → Add 10µF or 100µF capacitor on VCC/GND.
+Add a 10µF–100µF capacitor to NRF24L01 VCC/GND.
 
-Motors spin the wrong direction
+Motors spin in the wrong direction
 
-Do not rewire.
-Adjust direction variables in code or swap logical pins in your motor function.
+Adjust the direction variables instead of rewiring.
 
-Buzzer beeps constantly
+Constant buzzer beeping
 
-Ultrasonic sensor sees an object <15 cm.
-Clear the path.
+Obstacle detected < 15 cm.
 
 Robot doesn’t move at low tilt
 
-Increase:
+Increase minPWM.
 
-minPWM = 90;
+---
 
- License
+## License
 
-This project is open-source.
-Feel free to modify, extend, and contribute!
+This project is open-source under the MIT License.
+Feel free to use, modify, and contribute!
+
